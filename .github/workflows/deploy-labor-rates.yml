@@ -4,13 +4,13 @@ on:
   push:
     branches: [main]
     paths:
-      - "lambda/labor_rates/**"
+      - "labor_rates/**"
   workflow_dispatch:
 
 env:
-  AWS_REGION:    us-east-1
-  ECR_REPO:      govhub/lambda-labor-rates
-  LAMBDA_NAME:   govhub-labor-rates
+  AWS_REGION:  us-east-2
+  ECR_REPO:    govhub/lambda-labor-rates
+  LAMBDA_NAME: govhub-labor-rates
 
 jobs:
   deploy:
@@ -37,8 +37,9 @@ jobs:
         run: |
           IMAGE_URI=$ECR_REGISTRY/$ECR_REPO
 
-          docker build -t $IMAGE_URI:$IMAGE_TAG -t $IMAGE_URI:latest \
-            lambda/labor_rates/
+          docker build --platform linux/amd64 --provenance=false \
+            -t $IMAGE_URI:$IMAGE_TAG -t $IMAGE_URI:latest \
+            labor_rates/
 
           docker push $IMAGE_URI:$IMAGE_TAG
           docker push $IMAGE_URI:latest
