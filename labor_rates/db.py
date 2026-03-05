@@ -19,7 +19,13 @@ def insert_rates(conn, records) -> int:
     if not records:
         return 0
 
-    rows = [r.to_row() for r in records]
+    # Deduplicate within batch — last occurrence wins for same conflict key
+    seen = {}
+    for r in records:
+        key = (r.vendor_name, r.contract_number, r.labor_category)
+        seen[key] = r
+
+    rows = [r.to_row() for r in seen.values()]
 
     sql = """
         INSERT INTO labor_rates
@@ -29,17 +35,19 @@ def insert_rates(conn, records) -> int:
         VALUES %s
         ON CONFLICT (vendor_name, contract_number, labor_category)
         DO UPDATE SET
-            hourly_rate    = EXCLUDED.hourly_rate,
-            min_experience = EXCLUDED.min_experience,
-            education_level= EXCLUDED.education_level,
-            schedule       = EXCLUDED.schedule,
-            sin_number     = EXCLUDED.sin_number,
-            collected_date = EXCLUDED.collected_date;
+            hourly_rate     = EXCLUDED.hourly_rate,
+            min_experience  = EXCLUDED.min_experience,
+            education_level = EXCLUDED.education_level,
+            schedule        = EXCLUDED.schedule,
+            sin_number      = EXCLUDED.sin_number,
+            collected_date  = EXCLUDED.collected_date;
     """
     with conn.cursor() as cur:
         execute_values(cur, sql, rows, page_size=500)
     conn.commit()
-    logger.info(f"Upserted {len(rows)} rows into labor_rates")
+    logger.info(
+        f"Upserted {len(rows)} rows into labor_rates ({len(records) - len(rows)} duplicates dropped)"
+    )
     return len(rows)
 
 
