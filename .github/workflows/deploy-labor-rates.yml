@@ -9,6 +9,7 @@ env:
   AWS_REGION:  us-east-2
   ECR_REPO:    govhub/lambda-labor-rates
   LAMBDA_NAME: govhub-labor-rates
+  
 
 jobs:
   deploy:
