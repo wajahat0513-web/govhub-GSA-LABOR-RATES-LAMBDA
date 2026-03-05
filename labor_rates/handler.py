@@ -11,9 +11,9 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)
 
 BASE_URL = "https://api.gsa.gov/acquisition/calc/v3/api/ceilingrates/"
-PAGE_SIZE = 50  # records per page — do not change unless API changes
+PAGE_SIZE = 100  # records per page — do not change unless API changes
 BATCH_SIZE = 5  # pages fetched concurrently per batch
-MAX_PAGES = 10  # set to an int e.g. 10 to cap pages for testing, None = fetch all
+MAX_PAGES = 50  # set to an int e.g. 10 to cap pages for testing, None = fetch all
 MAX_RETRIES = 3
 
 
