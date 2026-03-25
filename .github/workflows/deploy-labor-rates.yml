@@ -6,10 +6,9 @@ on:
   workflow_dispatch:
 
 env:
-  AWS_REGION:  us-east-2
+  AWS_REGION:  us-east-1
   ECR_REPO:    govhub/lambda-labor-rates
   LAMBDA_NAME: govhub-labor-rates
-  
 
 jobs:
   deploy:
@@ -50,3 +49,12 @@ jobs:
           aws lambda update-function-code \
             --function-name ${{ env.LAMBDA_NAME }} \
             --image-uri ${{ env.IMAGE_URI }}
+
+          aws lambda wait function-updated \
+            --function-name ${{ env.LAMBDA_NAME }}
+
+      - name: Update Lambda environment variables
+        run: |
+          aws lambda update-function-configuration \
+            --function-name ${{ env.LAMBDA_NAME }} \
+            --environment "Variables={DATABASE_URL=${{ secrets.DATABASE_URL }},GSA_CALC_API_KEY=${{ secrets.GSA_CALC_API_KEY }}}"
